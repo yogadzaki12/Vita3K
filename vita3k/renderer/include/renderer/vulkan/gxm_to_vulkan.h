@@ -41,6 +41,7 @@ vk::StencilOp translate_stencil_op(SceGxmStencilOp stencil_op);
 
 namespace color {
 vk::Format translate_format(SceGxmColorBaseFormat base_format);
+vk::Format translate_format(SceGxmColorFormat format);
 vk::ComponentMapping translate_swizzle(SceGxmColorFormat format);
 } // namespace color
 

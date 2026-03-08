@@ -476,6 +476,26 @@ vk::Format translate_format(SceGxmColorBaseFormat format) {
         return {};
     }
 }
+
+vk::Format translate_format(SceGxmColorFormat format) {
+    const SceGxmColorBaseFormat base_format = gxm::get_base_format(format);
+    if (base_format != SCE_GXM_COLOR_BASE_FORMAT_U2U10U10U10)
+        return translate_format(base_format);
+
+    switch (format) {
+    case SCE_GXM_COLOR_FORMAT_U2U10U10U10_ARGB:
+    case SCE_GXM_COLOR_FORMAT_U10U10U10U2_BGRA:
+        return vk::Format::eA2R10G10B10UnormPack32;
+
+    case SCE_GXM_COLOR_FORMAT_U2U10U10U10_ABGR:
+    case SCE_GXM_COLOR_FORMAT_U10U10U10U2_RGBA:
+        return vk::Format::eA2B10G10R10UnormPack32;
+
+    default:
+        // Fallback to previous behavior for unknown swizzle combinations.
+        return translate_format(base_format);
+    }
+}
 } // namespace color
 
 namespace texture {
