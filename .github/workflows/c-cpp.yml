@@ -7,6 +7,7 @@ on:
   pull_request:
     paths-ignore:
       - '**/*.md'
+  workflow_dispatch:
 
 env:
   BUILD_CONFIG: Release
@@ -126,8 +127,16 @@ jobs:
 
       - name: Set up build environment (Android)
         run: |
+          sudo apt-get update
           sudo apt-get install -y ninja-build
-          vcpkg install boost-system boost-filesystem boost-program-options boost-icl boost-variant openssl zlib --triplet=${{ matrix.vcpkg_triplet }}
+
+          VCPKG_DIR=/usr/local/share/vcpkg
+          if [ ! -x "$VCPKG_DIR/vcpkg" ]; then
+            git clone --depth 1 https://github.com/microsoft/vcpkg "$VCPKG_DIR"
+            "$VCPKG_DIR/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+
+          "$VCPKG_DIR/vcpkg" install boost-system boost-filesystem boost-program-options boost-icl boost-variant openssl zlib --triplet=${{ matrix.vcpkg_triplet }}
         if: matrix.os == 'android'
 
       - uses: hendrikmuhs/ccache-action@v1.2
