@@ -261,11 +261,13 @@ void convert_u2f10f10f10_to_f16f16f16f16(void *dest, const void *data, const uin
     auto dst = static_cast<std::array<uint16_t, 4> *>(dest);
     auto src = static_cast<const uint32_t *>(data);
 
-    // are the 2 alpha bits in the upper or lower bits of the pixel ?
-    bool is_alpha_upper = (format == SCE_GXM_TEXTURE_FORMAT_U2F10F10F10_ABGR
-        || format == SCE_GXM_TEXTURE_FORMAT_U2F10F10F10_ARGB
-        || format == SCE_GXM_TEXTURE_FORMAT_X2F10F10F10_1BGR
-        || format == SCE_GXM_TEXTURE_FORMAT_X2F10F10F10_1RGB);
+    // Determine alpha-bit placement from swizzle bits only.
+    // Comparing full packed format is fragile when other format bits are present.
+    const auto swizzle = static_cast<SceGxmTextureSwizzle4Mode>(format & SCE_GXM_TEXTURE_SWIZZLE_MASK);
+    const bool is_alpha_upper = (swizzle == SCE_GXM_TEXTURE_SWIZZLE4_ABGR
+        || swizzle == SCE_GXM_TEXTURE_SWIZZLE4_ARGB
+        || swizzle == SCE_GXM_TEXTURE_SWIZZLE4_1BGR
+        || swizzle == SCE_GXM_TEXTURE_SWIZZLE4_1RGB);
 
     // f16 values for u2 channel
     constexpr uint16_t u2_to_f16[4] = { 0, 0x3555, 0x3955, 0x3c00 }; /*{0,1/3,2/3,1}*/
