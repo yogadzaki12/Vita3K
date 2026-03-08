@@ -538,6 +538,17 @@ void draw(VKContext &context, SceGxmPrimitiveType type, SceGxmIndexFormat format
         }
         context.render_cmd.bindIndexBuffer(buffer, offset, index_type);
     } else {
+        if (use_memory_mapping && context.state.mapping_method == MappingMethod::DoubleBuffer) {
+            const bool uses_primitive_restart = primitive_uses_restart(type);
+            if (format == SCE_GXM_INDEX_FORMAT_U16) {
+                uint16_t *data = indices.cast<uint16_t>().get(mem);
+                max_index = get_max_index(data, count, uses_primitive_restart);
+            } else {
+                uint32_t *data = indices.cast<uint32_t>().get(mem);
+                max_index = get_max_index(data, count, uses_primitive_restart);
+            }
+        }
+
         const size_t index_buffer_size = index_size * count;
         context.index_stream_ring_buffer.allocate(context.prerender_cmd, index_buffer_size, indices_ptr);
         context.render_cmd.bindIndexBuffer(context.index_stream_ring_buffer.handle(), context.index_stream_ring_buffer.data_offset, index_type);
