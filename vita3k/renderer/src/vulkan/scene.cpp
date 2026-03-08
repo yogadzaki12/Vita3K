@@ -516,7 +516,8 @@ void draw(VKContext &context, SceGxmPrimitiveType type, SceGxmIndexFormat format
     if (use_memory_mapping) {
         auto [buffer, offset] = context.state.get_matching_mapping(indices);
         if (context.state.mapping_method == MappingMethod::DoubleBuffer) {
-            TrappedBuffer *trapped_buffer = context.state.buffer_trapping.access_buffer(indices.address(), count * index_size, mem);
+            // Index buffers can be rewritten frequently by the guest; force refresh to avoid stale mapped content.
+            TrappedBuffer *trapped_buffer = context.state.buffer_trapping.access_buffer(indices.address(), count * index_size, mem, true, true);
             if (trapped_buffer->extra == ~0) {
                 // store the max element in extra
                 const bool uses_primitive_restart = primitive_uses_restart(type);

@@ -1548,7 +1548,7 @@ TrappedBuffer *BufferTrapping::access_buffer(Address addr, uint32_t size, MemSta
     if (it != trapped_buffers.end()) {
         // must check if everything match
         TrappedBuffer &buffer = it->second;
-        if (!buffer.dirty && buffer.size >= size)
+        if (!always_trap && !buffer.dirty && buffer.size >= size)
             // nothing to change
             return &it->second;
     } else {
