@@ -125,6 +125,12 @@ void set_context(VKContext &context, MemState &mem, VKRenderTarget *rt, const Fe
     context.record.is_gamma_corrected = static_cast<bool>(color_surface_fin->gamma);
     vk::Format vk_format = color::translate_format(color_surface_fin->colorFormat);
 
+    if (context.record.color_base_format == SCE_GXM_COLOR_BASE_FORMAT_U2U10U10U10) {
+        // Diagnostic fallback: some GPUs/drivers appear to mishandle packed 10:10:10:2 RT writes.
+        vk_format = vk::Format::eR8G8B8A8Unorm;
+        LOG_WARN_ONCE("Using RGBA8 fallback for U2U10U10U10 color surface in Vulkan render target path");
+    }
+
     if (color_surface_fin->gamma && vk_format == vk::Format::eR8G8B8A8Unorm) {
         vk_format = vk::Format::eR8G8B8A8Srgb;
     }

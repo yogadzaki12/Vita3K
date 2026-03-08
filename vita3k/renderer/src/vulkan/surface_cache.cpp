@@ -171,6 +171,12 @@ SurfaceRetrieveResult VKSurfaceCache::retrieve_color_surface_for_framebuffer(Mem
     const SceGxmColorBaseFormat base_format = gxm::get_base_format(color->colorFormat);
     vk::Format vk_format = color::translate_format(color->colorFormat);
 
+    if (base_format == SCE_GXM_COLOR_BASE_FORMAT_U2U10U10U10) {
+        // Keep this consistent with context.cpp fallback to avoid packed RT driver issues.
+        vk_format = vk::Format::eR8G8B8A8Unorm;
+        LOG_WARN_ONCE("Using RGBA8 fallback for U2U10U10U10 color surface in Vulkan framebuffer cache");
+    }
+
     SurfaceTiling tiling;
     if (color->surfaceType == SCE_GXM_COLOR_SURFACE_LINEAR)
         tiling = SurfaceTiling::Linear;
@@ -359,6 +365,11 @@ std::optional<TextureLookupResult> VKSurfaceCache::retrieve_color_surface_as_tex
 
     const vk::ComponentMapping swizzle = texture::translate_swizzle(gxm::get_format(texture));
     vk::Format vk_format = color::translate_format(base_format);
+
+    if (base_format == SCE_GXM_COLOR_BASE_FORMAT_U2U10U10U10) {
+        // Match framebuffer fallback format when reusing color surfaces as textures.
+        vk_format = vk::Format::eR8G8B8A8Unorm;
+    }
 
     const bool is_srgb = texture.gamma_mode != 0;
     if (is_srgb) {
