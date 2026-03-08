@@ -765,6 +765,10 @@ static vk::StencilOpState convert_op_state(const GxmStencilStateOp &state) {
     };
 }
 
+static bool primitive_restart_enabled(const SceGxmPrimitiveType type) {
+    return type == SCE_GXM_PRIMITIVE_TRIANGLE_STRIP || type == SCE_GXM_PRIMITIVE_TRIANGLE_FAN;
+}
+
 vk::Pipeline PipelineCache::compile_pipeline(SceGxmPrimitiveType type, vk::RenderPass render_pass, const SceGxmVertexProgram &vertex_program_gxm, const SceGxmFragmentProgram &fragment_program_gxm, const GxmRecordState &record, const shader::Hints &hints, MemState &mem) {
     const VertexProgram &vertex_program = *vertex_program_gxm.renderer_data;
     const SceGxmProgram *gxm_fragment_shader = fragment_program_gxm.program.get(mem);
@@ -782,7 +786,8 @@ vk::Pipeline PipelineCache::compile_pipeline(SceGxmPrimitiveType type, vk::Rende
     const uint32_t shader_stage_count = is_fragment_disabled ? 1U : 2U;
 
     const vk::PipelineInputAssemblyStateCreateInfo input_assembly{
-        .topology = translate_primitive(type)
+        .topology = translate_primitive(type),
+        .primitiveRestartEnable = primitive_restart_enabled(type)
     };
 
     const bool two_sided = (record.two_sided == SCE_GXM_TWO_SIDED_ENABLED);

@@ -21,6 +21,7 @@
 
 #include <span>
 #include <stack>
+#include <limits>
 #if defined(__x86_64__) && !defined(__APPLE__)
 #include <xxh_x86dispatch.h>
 #else
@@ -2118,6 +2119,32 @@ static void gxmSetUniformBuffers(renderer::State &state, GxmState &gxm, SceGxmCo
     }
 }
 
+static inline bool gxm_primitive_uses_restart(const SceGxmPrimitiveType prim_type) {
+    return prim_type == SCE_GXM_PRIMITIVE_TRIANGLE_STRIP || prim_type == SCE_GXM_PRIMITIVE_TRIANGLE_FAN;
+}
+
+template <typename T>
+static uint32_t gxm_get_max_index(const T *data, const uint32_t count, const bool uses_primitive_restart) {
+    if (!data || count == 0)
+        return 0;
+
+    if (!uses_primitive_restart)
+        return static_cast<uint32_t>(*std::max_element(&data[0], &data[count]));
+
+    const T restart_index = std::numeric_limits<T>::max();
+    uint32_t max_index = 0;
+    bool found_real_index = false;
+    for (uint32_t i = 0; i < count; i++) {
+        if (data[i] == restart_index)
+            continue;
+
+        max_index = std::max<uint32_t>(max_index, data[i]);
+        found_real_index = true;
+    }
+
+    return found_real_index ? max_index : 0;
+}
+
 static int gxmDrawElementGeneral(EmuEnvState &emuenv, const char *export_name, const SceUID thread_id, SceGxmContext *context, SceGxmPrimitiveType primType, SceGxmIndexFormat indexType, Ptr<const void> indexData, uint32_t indexCount, uint32_t instanceCount) {
     if (!context || !indexData)
         return RET_ERROR(SCE_GXM_ERROR_INVALID_POINTER);
@@ -2178,12 +2205,13 @@ static int gxmDrawElementGeneral(EmuEnvState &emuenv, const char *export_name, c
     size_t max_index = 0;
     if (!emuenv.renderer->features.enable_memory_mapping) {
         // we don't need to get the vertex buffer size with memory mapping
+        const bool uses_primitive_restart = gxm_primitive_uses_restart(primType);
         if (indexType == SCE_GXM_INDEX_FORMAT_U16) {
             const uint16_t *const data = static_cast<const uint16_t *>(indices_ptr);
-            max_index = *std::max_element(&data[0], &data[indexCount]);
+            max_index = gxm_get_max_index(data, indexCount, uses_primitive_restart);
         } else {
             const uint32_t *const data = static_cast<const uint32_t *>(indices_ptr);
-            max_index = *std::max_element(&data[0], &data[indexCount]);
+            max_index = gxm_get_max_index(data, indexCount, uses_primitive_restart);
         }
     }
 
@@ -2300,12 +2328,13 @@ EXPORT(int, sceGxmDrawPrecomputed, SceGxmContext *context, SceGxmPrecomputedDraw
     uint32_t max_index = 0;
     if (!emuenv.renderer->features.enable_memory_mapping) {
         // we don't need to get the vertex buffer size with memory mapping
+        const bool uses_primitive_restart = gxm_primitive_uses_restart(draw->type);
         if (draw->index_format == SCE_GXM_INDEX_FORMAT_U16) {
             const uint16_t *const data = draw->index_data.cast<const uint16_t>().get(emuenv.mem);
-            max_index = *std::max_element(&data[0], &data[draw->vertex_count]);
+            max_index = gxm_get_max_index(data, draw->vertex_count, uses_primitive_restart);
         } else {
             const uint32_t *const data = draw->index_data.cast<const uint32_t>().get(emuenv.mem);
-            max_index = *std::max_element(&data[0], &data[draw->vertex_count]);
+            max_index = gxm_get_max_index(data, draw->vertex_count, uses_primitive_restart);
         }
     }
 

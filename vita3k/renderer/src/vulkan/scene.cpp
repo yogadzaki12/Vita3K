@@ -25,7 +25,35 @@
 
 #include <util/log.h>
 
+#include <limits>
+
 namespace renderer::vulkan {
+
+static inline bool primitive_uses_restart(const SceGxmPrimitiveType prim_type) {
+    return prim_type == SCE_GXM_PRIMITIVE_TRIANGLE_STRIP || prim_type == SCE_GXM_PRIMITIVE_TRIANGLE_FAN;
+}
+
+template <typename T>
+static uint32_t get_max_index(const T *data, const uint32_t count, const bool uses_primitive_restart) {
+    if (!data || count == 0)
+        return 0;
+
+    if (!uses_primitive_restart)
+        return *std::max_element(&data[0], &data[count]);
+
+    const T restart_index = std::numeric_limits<T>::max();
+    uint32_t max_index = 0;
+    bool found_real_index = false;
+    for (uint32_t i = 0; i < count; i++) {
+        if (data[i] == restart_index)
+            continue;
+
+        max_index = std::max<uint32_t>(max_index, data[i]);
+        found_real_index = true;
+    }
+
+    return found_real_index ? max_index : 0;
+}
 
 void set_uniform_buffer(VKContext &context, MemState &mem, const ShaderProgram *program, const bool vertex_shader, const int block_num, const int size, Ptr<uint8_t> data) {
     auto offset = program->uniform_buffer_data_offsets.at(block_num);
@@ -491,12 +519,13 @@ void draw(VKContext &context, SceGxmPrimitiveType type, SceGxmIndexFormat format
             TrappedBuffer *trapped_buffer = context.state.buffer_trapping.access_buffer(indices.address(), count * index_size, mem);
             if (trapped_buffer->extra == ~0) {
                 // store the max element in extra
+                const bool uses_primitive_restart = primitive_uses_restart(type);
                 if (format == SCE_GXM_INDEX_FORMAT_U16) {
                     uint16_t *data = indices.cast<uint16_t>().get(mem);
-                    trapped_buffer->extra = *std::max_element(&data[0], &data[count]);
+                    trapped_buffer->extra = get_max_index(data, count, uses_primitive_restart);
                 } else {
                     uint32_t *data = indices.cast<uint32_t>().get(mem);
-                    trapped_buffer->extra = *std::max_element(&data[0], &data[count]);
+                    trapped_buffer->extra = get_max_index(data, count, uses_primitive_restart);
                 }
             }
             max_index = trapped_buffer->extra;
