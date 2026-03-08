@@ -635,16 +635,27 @@ vk::PipelineVertexInputStateCreateInfo PipelineCache::get_vertex_input_state(con
         if (info.regformat) {
             // use the data from the shader itself
             component_count = info.component_count;
+            bool regformat_signed = false;
             switch (info.gxm_type) {
             case SCE_GXM_PARAMETER_TYPE_U8:
-            case SCE_GXM_PARAMETER_TYPE_S8:
             case SCE_GXM_PARAMETER_TYPE_C10:
                 attribute_format = SCE_GXM_ATTRIBUTE_FORMAT_U8;
                 break;
+            case SCE_GXM_PARAMETER_TYPE_S8:
+                attribute_format = SCE_GXM_ATTRIBUTE_FORMAT_U8;
+                regformat_signed = true;
+                break;
             case SCE_GXM_PARAMETER_TYPE_U16:
-            case SCE_GXM_PARAMETER_TYPE_S16:
             case SCE_GXM_PARAMETER_TYPE_F16:
                 attribute_format = SCE_GXM_ATTRIBUTE_FORMAT_U16;
+                break;
+            case SCE_GXM_PARAMETER_TYPE_S16:
+                attribute_format = SCE_GXM_ATTRIBUTE_FORMAT_U16;
+                regformat_signed = true;
+                break;
+            case SCE_GXM_PARAMETER_TYPE_S32:
+                attribute_format = SCE_GXM_ATTRIBUTE_FORMAT_UNTYPED;
+                regformat_signed = true;
                 break;
             default:
                 // U32 format
@@ -663,11 +674,11 @@ vk::PipelineVertexInputStateCreateInfo PipelineCache::get_vertex_input_state(con
                 component_count = 4;
             }
 
-            // regformat attributes are int32
-            format = translate_attribute_format(attribute_format, component_count, true, false);
+            // regformat attributes are loaded as integers, keep signedness from parameter type.
+            format = translate_attribute_format(attribute_format, component_count, true, regformat_signed);
             if (component_count == 3 && unsupported_rgb_vertex_attribute_formats.contains(format)) {
                 component_count = 4;
-                format = translate_attribute_format(attribute_format, component_count, true, false);
+                format = translate_attribute_format(attribute_format, component_count, true, regformat_signed);
             }
         } else {
             // some Android GPUs do not support scaled attributes, do the conversion in the GPU instead
