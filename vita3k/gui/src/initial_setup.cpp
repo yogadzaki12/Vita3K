@@ -23,6 +23,7 @@
 #include <gui/functions.h>
 #include <host/dialog/filesystem.h>
 #include <lang/functions.h>
+#include <util/log.h>
 
 #ifdef __ANDROID__
 #include <SDL3/SDL_system.h>
@@ -30,6 +31,22 @@
 #endif
 
 namespace gui {
+
+static void configure_log_path_from_pref(EmuEnvState &emuenv) {
+    // Keep logs alongside the user-selected emulator storage path.
+    emuenv.log_path = emuenv.pref_path;
+    fs::create_directories(emuenv.log_path / "shaderlog");
+    fs::create_directories(emuenv.log_path / "texturelog");
+    fs::create_directories(emuenv.log_path / "logs");
+
+    const auto log_file_path = emuenv.log_path / "vita3k.log";
+    if (logging::add_sink(log_file_path) != Success) {
+        LOG_ERROR("Failed to create log sink at {}", log_file_path);
+        return;
+    }
+
+    LOG_INFO("Log output path set to: {}", emuenv.log_path);
+}
 
 void get_firmware_file(EmuEnvState &emuenv) {
     const std::map<int, std::string> locale_id = {
@@ -274,6 +291,7 @@ void draw_initial_setup(GuiState &gui, EmuEnvState &emuenv) {
         TextCentered(lang["completed_setup"].c_str());
         ImGui::SetCursorPos(BIG_BUTTON_POS);
         if (ImGui::Button(common["ok"].c_str(), BIG_BUTTON_SIZE) || ImGui::IsKeyPressed(static_cast<ImGuiKey>(emuenv.cfg.keyboard_button_cross))) {
+            configure_log_path_from_pref(emuenv);
             emuenv.cfg.initial_setup = true;
             config::serialize_config(emuenv.cfg, emuenv.config_path);
         }
