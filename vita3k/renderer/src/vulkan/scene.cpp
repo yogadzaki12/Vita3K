@@ -326,9 +326,13 @@ static void bind_vertex_streams(VKContext &context, MemState &mem, uint32_t inst
     if (max_stream_idx == 0)
         return;
 
+    // Temporary safety path: DoubleBuffer mapping can still serve stale vertex data in some workloads.
+    // Force per-draw CPU uploads so vertex fetch always sees the latest guest memory.
+    const bool force_cpu_vertex_upload = context.state.mapping_method == MappingMethod::DoubleBuffer;
+
     for (int i = 0; i < max_stream_idx; i++) {
         if (state.vertex_streams[i].data) {
-            if (context.state.features.enable_memory_mapping) {
+            if (context.state.features.enable_memory_mapping && !force_cpu_vertex_upload) {
                 auto [buffer, offset] = context.state.get_matching_mapping(state.vertex_streams[i].data.cast<void>());
 
                 context.vertex_stream_offsets[i] = offset;
@@ -513,7 +517,8 @@ void draw(VKContext &context, SceGxmPrimitiveType type, SceGxmIndexFormat format
     const size_t index_size = (format == SCE_GXM_INDEX_FORMAT_U16) ? 2 : 4;
 
     uint32_t max_index = 0;
-    if (use_memory_mapping) {
+    const bool force_cpu_index_upload = use_memory_mapping && (context.state.mapping_method == MappingMethod::DoubleBuffer);
+    if (use_memory_mapping && !force_cpu_index_upload) {
         auto [buffer, offset] = context.state.get_matching_mapping(indices);
         if (context.state.mapping_method == MappingMethod::DoubleBuffer) {
             // Index buffers can be rewritten frequently by the guest; force refresh to avoid stale mapped content.
