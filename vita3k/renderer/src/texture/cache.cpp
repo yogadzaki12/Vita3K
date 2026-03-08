@@ -486,9 +486,8 @@ void TextureCache::upload_texture(const SceGxmTexture &gxm_texture, MemState &me
             pixels = texture_data_decompressed.data();
             break;
         case SCE_GXM_TEXTURE_BASE_FORMAT_U2F10F10F10:
-            // don't change what openGL is doing (which is completely wrong)
-            if (!is_vulkan)
-                break;
+            // Convert packed 10-bit float textures to a host-friendly float format.
+            // OpenGL upload for this format is currently unreliable and can corrupt channels.
             texture_data_decompressed.resize(pixels_per_stride * memory_height * 8);
             convert_u2f10f10f10_to_f16f16f16f16(texture_data_decompressed.data(), pixels, pixels_per_stride, memory_height, fmt);
             pixels = texture_data_decompressed.data();

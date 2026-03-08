@@ -462,14 +462,14 @@ void VKTextureCache::upload_texture_impl(SceGxmTextureBaseFormat base_format, ui
     vk::DeviceSize upload_size;
     uint32_t buffer_height = height;
     if (gxm::is_bcn_format(base_format)) {
-        upload_size = renderer::texture::get_compressed_size(base_format, pixels_per_stride, height);
         pixels_per_stride = align(pixels_per_stride, 4);
         buffer_height = align(buffer_height, 4);
+        upload_size = renderer::texture::get_compressed_size(base_format, pixels_per_stride, buffer_height);
     } else if (renderer::texture::is_astc_format(base_format)) {
-        upload_size = renderer::texture::get_compressed_size(base_format, pixels_per_stride, height);
         const uint32_t block_height = gxm::get_block_size(base_format).second;
         // align can only be used with powers of 2 (not necessarily the case here)
         buffer_height = (buffer_height + block_height - 1) / block_height * block_height;
+        upload_size = renderer::texture::get_compressed_size(base_format, pixels_per_stride, buffer_height);
     } else {
         size_t bpp = gxm::bits_per_pixel(base_format);
         size_t bytes_per_pixel = (bpp + 7) >> 3;
