@@ -190,8 +190,12 @@ RingBuffer::RingBuffer(vk::BufferUsageFlags usage, const size_t capacity)
 }
 
 void RingBuffer::allocate(const uint32_t data_size) {
+    cursor = align(cursor, alignment);
+
     if (cursor + data_size > capacity)
         cursor = 0;
+
+    cursor = align(cursor, alignment);
 
     data_offset = cursor;
 

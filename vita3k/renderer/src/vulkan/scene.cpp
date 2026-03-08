@@ -245,6 +245,15 @@ static void draw_bind_descriptors(VKContext &context, MemState &mem) {
         context.fragment_uniform_stream_ring_buffer.data_offset
     };
 
+    const uint32_t ubo_align = static_cast<uint32_t>(state.physical_device_properties.limits.minUniformBufferOffsetAlignment);
+    const uint32_t ssbo_align = static_cast<uint32_t>(state.physical_device_properties.limits.minStorageBufferOffsetAlignment);
+    if (ubo_align && ((dynamic_offsets[0] % ubo_align) || (dynamic_offsets[1] % ubo_align))) {
+        LOG_WARN_ONCE("Misaligned dynamic UBO offset detected: vert={}, frag={}, required alignment={}", dynamic_offsets[0], dynamic_offsets[1], ubo_align);
+    }
+    if (!state.features.enable_memory_mapping && ssbo_align && ((dynamic_offsets[2] % ssbo_align) || (dynamic_offsets[3] % ssbo_align))) {
+        LOG_WARN_ONCE("Misaligned dynamic SSBO offset detected: vert={}, frag={}, required alignment={}", dynamic_offsets[2], dynamic_offsets[3], ssbo_align);
+    }
+
     context.render_cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline_layout, 0,
         descriptors.size(), descriptors.data(), dynamic_offset_count, dynamic_offsets);
 }
