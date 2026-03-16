@@ -127,8 +127,21 @@ jobs:
 
       - name: Set up build environment (Android)
         run: |
-          sudo apt-get install -y ninja-build
-          vcpkg install boost-system boost-filesystem boost-program-options boost-icl boost-variant openssl zlib --triplet=${{ matrix.vcpkg_triplet }}
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache
+
+          export VCPKG_ROOT=/usr/local/share/vcpkg
+          if [ ! -d "$VCPKG_ROOT" ]; then
+            sudo mkdir -p /usr/local/share
+            sudo git clone https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
+            sudo chown -R "$USER":"$USER" "$VCPKG_ROOT"
+          fi
+
+          if [ ! -x "$VCPKG_ROOT/vcpkg" ]; then
+            "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+
+          "$VCPKG_ROOT/vcpkg" install boost-system boost-filesystem boost-program-options boost-icl boost-variant openssl zlib --triplet=${{ matrix.vcpkg_triplet }}
         if: matrix.os == 'android'
 
       - uses: hendrikmuhs/ccache-action@v1.2
