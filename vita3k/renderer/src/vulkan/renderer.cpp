@@ -922,6 +922,38 @@ void VKState::late_init(const Config &cfg, const std::string_view game_id, MemSt
         features.use_texture_viewport = true;
     }
 
+    features.preserve_f16_nan_as_u16 = cfg.current_config.debug_force_preserve_f16_u16_attachment;
+    features.force_highp_precision = cfg.current_config.debug_force_mediump_highp;
+    features.disable_vertex_color = cfg.current_config.debug_disable_vertex_color;
+    features.force_texture_sampling = cfg.current_config.debug_force_texture_sampling;
+
+    const int forced_render_paths = static_cast<int>(cfg.current_config.debug_force_direct_fragcolor)
+        + static_cast<int>(cfg.current_config.debug_force_shader_interlock)
+        + static_cast<int>(cfg.current_config.debug_force_texture_barrier);
+    if (forced_render_paths > 1) {
+        LOG_WARN("Multiple debug render paths requested. Priority: direct fragcolor > shader interlock > texture barrier");
+    }
+
+    if (cfg.current_config.debug_force_direct_fragcolor) {
+        features.direct_fragcolor = true;
+        features.support_shader_interlock = false;
+        features.support_texture_barrier = false;
+        LOG_INFO("Debug render path: forcing direct fragcolor (shader interlock disabled)");
+    } else if (cfg.current_config.debug_force_shader_interlock) {
+        if (features.support_shader_interlock) {
+            features.direct_fragcolor = false;
+            features.support_texture_barrier = false;
+            LOG_INFO("Debug render path: forcing shader interlock");
+        } else {
+            LOG_WARN("Debug render path requested shader interlock, but the GPU does not support it");
+        }
+    } else if (cfg.current_config.debug_force_texture_barrier) {
+        features.direct_fragcolor = false;
+        features.support_shader_interlock = false;
+        features.support_texture_barrier = true;
+        LOG_INFO("Debug render path: forcing texture barrier path");
+    }
+
     // parse the mapping method
     auto &config_mapping = cfg.current_config.memory_mapping;
     MappingMethod request_mapping = MappingMethod::Disabled;
@@ -1076,10 +1108,16 @@ uint32_t VKState::get_features_mask() {
     union {
         struct {
             bool use_shader_interlock : 1;
+            bool use_texture_barrier : 1;
             bool use_texture_viewport : 1;
             bool use_memory_mapping : 1;
             bool use_rgb_attributes : 1;
             bool use_scaled_attributes : 1;
+            bool use_direct_fragcolor : 1;
+            bool use_preserve_f16_u16_attachment : 1;
+            bool use_force_highp_precision : 1;
+            bool use_disable_vertex_color : 1;
+            bool use_force_texture_sampling : 1;
         };
         uint32_t value;
     } features_mask;
@@ -1087,10 +1125,16 @@ uint32_t VKState::get_features_mask() {
 
     features_mask.value = 0;
     features_mask.use_shader_interlock = features.support_shader_interlock;
+    features_mask.use_texture_barrier = features.support_texture_barrier;
     features_mask.use_texture_viewport = features.use_texture_viewport;
     features_mask.use_memory_mapping = features.enable_memory_mapping;
     features_mask.use_rgb_attributes = features.support_rgb_attributes;
     features_mask.use_scaled_attributes = pipeline_cache.support_scaled_vertex_attribute;
+    features_mask.use_direct_fragcolor = features.direct_fragcolor;
+    features_mask.use_preserve_f16_u16_attachment = features.preserve_f16_nan_as_u16;
+    features_mask.use_force_highp_precision = features.force_highp_precision;
+    features_mask.use_disable_vertex_color = features.disable_vertex_color;
+    features_mask.use_force_texture_sampling = features.force_texture_sampling;
 
     return features_mask.value;
 }

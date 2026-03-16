@@ -113,16 +113,13 @@ struct TranslationState {
     bool is_fragment = false;
     bool is_target_glsl = false;
     bool is_vulkan = false;
+    bool force_highp_precision = false;
     spv::ImageFormat image_storage_format = spv::ImageFormat::ImageFormatUnknown;
     const Hints *hints = nullptr;
 };
 
 static bool force_full_precision_fragment_vulkan(const TranslationState &translation_state) {
-#ifdef __ANDROID__
-    return translation_state.is_vulkan && translation_state.is_fragment;
-#else
-    return false;
-#endif
+    return translation_state.is_vulkan && translation_state.is_fragment && translation_state.force_highp_precision;
 }
 
 struct VertexProgramOutputProperties {
@@ -470,6 +467,10 @@ static void create_fragment_inputs(spv::Builder &b, SpirvShaderParameters &param
                 res_multiplier = b.createCompositeConstruct(v4, { res_multiplier, res_multiplier, one, one });
 
                 pa_iter_var = b.createBinOp(spv::OpFDiv, v4, pa_iter_var, res_multiplier);
+            } else if (features.disable_vertex_color && (input_id == 0xA000 || input_id == 0xB000)) {
+                const spv::Id one = b.makeFloatConstant(1.0f);
+                pa_iter_var = b.makeCompositeConstant(v4, { one, one, one, one });
+                pa_dtype = DataType::F32;
             } else {
                 spv::Decoration precision = get_data_type_size(pa_dtype) < 4 ? spv::DecorationRelaxedPrecision : spv::NoPrecision;
                 if (force_full_precision_fragment_vulkan(translation_state))
@@ -2089,6 +2090,7 @@ GeneratedShader convert_gxp(const SceGxmProgram &program, const std::string &sha
     translation_state.is_maskupdate = maskupdate;
     translation_state.is_target_glsl = (target == Target::GLSLOpenGL);
     translation_state.is_vulkan = (target == Target::SpirVVulkan);
+    translation_state.force_highp_precision = features.force_highp_precision;
     translation_state.hints = &hints;
 
     if (!features.support_unknown_format) {

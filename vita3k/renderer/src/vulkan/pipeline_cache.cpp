@@ -114,7 +114,7 @@ void PipelineCache::init(bool support_rasterized_order_access) {
         // layout for the mask, color attachment as input, being an input attachment or a storage image
         // depending on whether or not we are using shader interlock
         std::array<vk::DescriptorSetLayoutBinding, 2> layout_binding;
-        const vk::DescriptorType intput_image_descriptor = state.features.support_shader_interlock
+        const vk::DescriptorType intput_image_descriptor = state.features.is_programmable_blending_need_to_bind_color_attachment()
             ? vk::DescriptorType::eStorageImage
             : vk::DescriptorType::eInputAttachment;
         layout_binding[0] = vk::DescriptorSetLayoutBinding{

@@ -273,7 +273,7 @@ static vk::DescriptorSet retrieve_color_descriptor(VKState &state, FrameDescript
     // we have no more frame descriptor available, create a bunch of new one for this specific layout
     // the type depends on the way we read it
     vk::DescriptorPoolSize pool_size{
-        .type = state.features.support_shader_interlock ? vk::DescriptorType::eStorageImage : vk::DescriptorType::eInputAttachment,
+        .type = state.features.is_programmable_blending_need_to_bind_color_attachment() ? vk::DescriptorType::eStorageImage : vk::DescriptorType::eInputAttachment,
         .descriptorCount = DESCRIPTOR_PACK_SIZE * MAX_FRAMES_RENDERING
     };
 
@@ -365,7 +365,7 @@ void VKContext::start_render_pass(bool create_descriptor_set) {
         .imageLayout = vk::ImageLayout::eGeneral,
     };
 
-    const vk::DescriptorType input_type = state.features.support_shader_interlock ? vk::DescriptorType::eStorageImage : vk::DescriptorType::eInputAttachment;
+    const vk::DescriptorType input_type = state.features.is_programmable_blending_need_to_bind_color_attachment() ? vk::DescriptorType::eStorageImage : vk::DescriptorType::eInputAttachment;
     vk::WriteDescriptorSet write_descr{
         .dstSet = rendertarget_set,
         .dstBinding = 0,

@@ -163,6 +163,13 @@ enum ScreenshotFormat {
     code(bool, "asia-font-support", false, asia_font_support)                                           \
     code(bool, "shader-cache", true, shader_cache)                                                      \
     code(bool, "spirv-shader", false, spirv_shader)                                                     \
+    code(bool, "debug-force-shader-interlock", false, debug_force_shader_interlock)                     \
+    code(bool, "debug-force-direct-fragcolor", false, debug_force_direct_fragcolor)                     \
+    code(bool, "debug-force-texture-barrier", false, debug_force_texture_barrier)                       \
+    code(bool, "debug-force-preserve-f16-u16-attachment", false, debug_force_preserve_f16_u16_attachment) \
+    code(bool, "debug-force-mediump-highp", false, debug_force_mediump_highp)                           \
+    code(bool, "debug-disable-vertex-color", false, debug_disable_vertex_color)                         \
+    code(bool, "debug-force-texture-sampling", false, debug_force_texture_sampling)                     \
     code(bool, "fps-hack", false, fps_hack)                                                             \
     code(uint64_t, "current-ime-lang", 4, current_ime_lang)                                             \
     code(int, "psn-signed-in", false, psn_signed_in)                                                    \

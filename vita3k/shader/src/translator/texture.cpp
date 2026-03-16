@@ -149,6 +149,11 @@ spv::Id shader::usse::USSETranslatorVisitor::do_fetch_texture(const spv::Id tex,
         }
     }
 
+    if (m_features.force_texture_sampling && gather4_comp == -1) {
+        op = (lod_mode == 4) ? spv::OpImageSampleProjImplicitLod : spv::OpImageSampleImplicitLod;
+        params = { tex, coord_id };
+    }
+
     image_sample = m_b.createOp(op, type_f32_v[4], params);
 
     if (get_data_type_size(dest_type) < 4 && dest_type != DataType::UINT16 && dest_type != DataType::INT16)

@@ -76,6 +76,13 @@ struct Config {
         bool v_sync = true;
         int anisotropic_filtering = 1;
         bool async_pipeline_compilation = true;
+        bool debug_force_shader_interlock = false;
+        bool debug_force_direct_fragcolor = false;
+        bool debug_force_texture_barrier = false;
+        bool debug_force_preserve_f16_u16_attachment = false;
+        bool debug_force_mediump_highp = false;
+        bool debug_disable_vertex_color = false;
+        bool debug_force_texture_sampling = false;
         bool import_textures = false;
         bool export_textures = false;
         bool export_as_png = false;

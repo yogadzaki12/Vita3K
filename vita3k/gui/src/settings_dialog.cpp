@@ -184,6 +184,13 @@ static bool get_custom_config(EmuEnvState &emuenv, const std::string &app_path) 
                 config.v_sync = gpu_child.attribute("v-sync").as_bool();
                 config.anisotropic_filtering = gpu_child.attribute("anisotropic-filtering").as_int();
                 config.async_pipeline_compilation = gpu_child.attribute("async-pipeline-compilation").as_bool();
+                config.debug_force_shader_interlock = gpu_child.attribute("debug-force-shader-interlock").as_bool();
+                config.debug_force_direct_fragcolor = gpu_child.attribute("debug-force-direct-fragcolor").as_bool();
+                config.debug_force_texture_barrier = gpu_child.attribute("debug-force-texture-barrier").as_bool();
+                config.debug_force_preserve_f16_u16_attachment = gpu_child.attribute("debug-force-preserve-f16-u16-attachment").as_bool();
+                config.debug_force_mediump_highp = gpu_child.attribute("debug-force-mediump-highp").as_bool();
+                config.debug_disable_vertex_color = gpu_child.attribute("debug-disable-vertex-color").as_bool();
+                config.debug_force_texture_sampling = gpu_child.attribute("debug-force-texture-sampling").as_bool();
                 config.import_textures = gpu_child.attribute("import-textures").as_bool();
                 config.export_textures = gpu_child.attribute("export-textures").as_bool();
                 config.export_as_png = gpu_child.attribute("export-as-png").as_bool();
@@ -266,6 +273,13 @@ void init_config(GuiState &gui, EmuEnvState &emuenv, const std::string &app_path
         config.v_sync = emuenv.cfg.v_sync;
         config.anisotropic_filtering = emuenv.cfg.anisotropic_filtering;
         config.async_pipeline_compilation = emuenv.cfg.async_pipeline_compilation;
+        config.debug_force_shader_interlock = emuenv.cfg.debug_force_shader_interlock;
+        config.debug_force_direct_fragcolor = emuenv.cfg.debug_force_direct_fragcolor;
+        config.debug_force_texture_barrier = emuenv.cfg.debug_force_texture_barrier;
+        config.debug_force_preserve_f16_u16_attachment = emuenv.cfg.debug_force_preserve_f16_u16_attachment;
+        config.debug_force_mediump_highp = emuenv.cfg.debug_force_mediump_highp;
+        config.debug_disable_vertex_color = emuenv.cfg.debug_disable_vertex_color;
+        config.debug_force_texture_sampling = emuenv.cfg.debug_force_texture_sampling;
         config.import_textures = emuenv.cfg.import_textures;
         config.export_textures = emuenv.cfg.export_textures;
         config.export_as_png = emuenv.cfg.export_as_png;
@@ -360,6 +374,13 @@ static void save_config(GuiState &gui, EmuEnvState &emuenv) {
         gpu_child.append_attribute("v-sync") = config.v_sync;
         gpu_child.append_attribute("anisotropic-filtering") = config.anisotropic_filtering;
         gpu_child.append_attribute("async-pipeline-compilation") = config.async_pipeline_compilation;
+        gpu_child.append_attribute("debug-force-shader-interlock") = config.debug_force_shader_interlock;
+        gpu_child.append_attribute("debug-force-direct-fragcolor") = config.debug_force_direct_fragcolor;
+        gpu_child.append_attribute("debug-force-texture-barrier") = config.debug_force_texture_barrier;
+        gpu_child.append_attribute("debug-force-preserve-f16-u16-attachment") = config.debug_force_preserve_f16_u16_attachment;
+        gpu_child.append_attribute("debug-force-mediump-highp") = config.debug_force_mediump_highp;
+        gpu_child.append_attribute("debug-disable-vertex-color") = config.debug_disable_vertex_color;
+        gpu_child.append_attribute("debug-force-texture-sampling") = config.debug_force_texture_sampling;
         gpu_child.append_attribute("import-textures") = config.import_textures;
         gpu_child.append_attribute("export-textures") = config.export_textures;
         gpu_child.append_attribute("export-as-png") = config.export_as_png;
@@ -402,6 +423,13 @@ static void save_config(GuiState &gui, EmuEnvState &emuenv) {
         emuenv.cfg.v_sync = config.v_sync;
         emuenv.cfg.anisotropic_filtering = config.anisotropic_filtering;
         emuenv.cfg.async_pipeline_compilation = config.async_pipeline_compilation;
+        emuenv.cfg.debug_force_shader_interlock = config.debug_force_shader_interlock;
+        emuenv.cfg.debug_force_direct_fragcolor = config.debug_force_direct_fragcolor;
+        emuenv.cfg.debug_force_texture_barrier = config.debug_force_texture_barrier;
+        emuenv.cfg.debug_force_preserve_f16_u16_attachment = config.debug_force_preserve_f16_u16_attachment;
+        emuenv.cfg.debug_force_mediump_highp = config.debug_force_mediump_highp;
+        emuenv.cfg.debug_disable_vertex_color = config.debug_disable_vertex_color;
+        emuenv.cfg.debug_force_texture_sampling = config.debug_force_texture_sampling;
         emuenv.cfg.import_textures = config.import_textures;
         emuenv.cfg.export_textures = config.export_textures;
         emuenv.cfg.export_as_png = config.export_as_png;
@@ -467,6 +495,13 @@ void set_current_config(EmuEnvState &emuenv, const std::string &app_path) {
         emuenv.cfg.current_config.v_sync = emuenv.cfg.v_sync;
         emuenv.cfg.current_config.anisotropic_filtering = emuenv.cfg.anisotropic_filtering;
         emuenv.cfg.current_config.async_pipeline_compilation = emuenv.cfg.async_pipeline_compilation;
+        emuenv.cfg.current_config.debug_force_shader_interlock = emuenv.cfg.debug_force_shader_interlock;
+        emuenv.cfg.current_config.debug_force_direct_fragcolor = emuenv.cfg.debug_force_direct_fragcolor;
+        emuenv.cfg.current_config.debug_force_texture_barrier = emuenv.cfg.debug_force_texture_barrier;
+        emuenv.cfg.current_config.debug_force_preserve_f16_u16_attachment = emuenv.cfg.debug_force_preserve_f16_u16_attachment;
+        emuenv.cfg.current_config.debug_force_mediump_highp = emuenv.cfg.debug_force_mediump_highp;
+        emuenv.cfg.current_config.debug_disable_vertex_color = emuenv.cfg.debug_disable_vertex_color;
+        emuenv.cfg.current_config.debug_force_texture_sampling = emuenv.cfg.debug_force_texture_sampling;
         emuenv.cfg.current_config.import_textures = emuenv.cfg.import_textures;
         emuenv.cfg.current_config.export_textures = emuenv.cfg.export_textures;
         emuenv.cfg.current_config.export_as_png = emuenv.cfg.export_as_png;
@@ -491,6 +526,14 @@ void set_current_config(EmuEnvState &emuenv, const std::string &app_path) {
  * @param app_path Path to the app or game to get the custom config for
  */
 void set_config(EmuEnvState &emuenv) {
+    const bool should_force_shader_interlock = emuenv.cfg.current_config.debug_force_shader_interlock;
+    const bool should_force_direct_fragcolor = emuenv.cfg.current_config.debug_force_direct_fragcolor;
+    const bool should_force_texture_barrier = emuenv.cfg.current_config.debug_force_texture_barrier;
+    const bool should_force_preserve_f16_u16_attachment = emuenv.cfg.current_config.debug_force_preserve_f16_u16_attachment;
+    const bool should_force_mediump_highp = emuenv.cfg.current_config.debug_force_mediump_highp;
+    const bool should_disable_vertex_color = emuenv.cfg.current_config.debug_disable_vertex_color;
+    const bool should_force_texture_sampling = emuenv.cfg.current_config.debug_force_texture_sampling;
+
     set_current_config(emuenv, emuenv.io.app_path);
 
     // If backend render or resolution multiplier is changed when app run, reboot emu and app
@@ -498,7 +541,14 @@ void set_config(EmuEnvState &emuenv) {
 #ifdef __ANDROID__
             || (emuenv.renderer->current_custom_driver != emuenv.cfg.current_config.custom_driver_name)
 #endif
-            || (emuenv.renderer->res_multiplier != emuenv.cfg.current_config.resolution_multiplier))) {
+            || (emuenv.renderer->res_multiplier != emuenv.cfg.current_config.resolution_multiplier)
+            || (should_force_shader_interlock != emuenv.cfg.current_config.debug_force_shader_interlock)
+            || (should_force_direct_fragcolor != emuenv.cfg.current_config.debug_force_direct_fragcolor)
+            || (should_force_texture_barrier != emuenv.cfg.current_config.debug_force_texture_barrier)
+            || (should_force_preserve_f16_u16_attachment != emuenv.cfg.current_config.debug_force_preserve_f16_u16_attachment)
+            || (should_force_mediump_highp != emuenv.cfg.current_config.debug_force_mediump_highp)
+            || (should_disable_vertex_color != emuenv.cfg.current_config.debug_disable_vertex_color)
+            || (should_force_texture_sampling != emuenv.cfg.current_config.debug_force_texture_sampling))) {
         emuenv.load_exec = true;
         emuenv.load_app_path = emuenv.io.app_path;
         emuenv.load_exec_path = emuenv.self_path;
@@ -1447,6 +1497,33 @@ void draw_settings_dialog(GuiState &gui, EmuEnvState &emuenv) {
             ImGui::Checkbox(lang.debug["validation_layer"].c_str(), &emuenv.cfg.validation_layer);
             ImGui::SameLine();
             SetTooltipEx(lang.debug["validation_layer_description"].c_str());
+
+            ImGui::Spacing();
+            TextColoredCentered(GUI_COLOR_TEXT_TITLE, lang.debug["render_path_debug"].c_str());
+            ImGui::Checkbox(lang.debug["force_shader_interlock"].c_str(), &config.debug_force_shader_interlock);
+            SetTooltipEx(lang.debug["force_shader_interlock_description"].c_str());
+            ImGui::Checkbox(lang.debug["force_direct_fragcolor"].c_str(), &config.debug_force_direct_fragcolor);
+            SetTooltipEx(lang.debug["force_direct_fragcolor_description"].c_str());
+            ImGui::Checkbox(lang.debug["force_texture_barrier"].c_str(), &config.debug_force_texture_barrier);
+            SetTooltipEx(lang.debug["force_texture_barrier_description"].c_str());
+
+            ImGui::Spacing();
+            TextColoredCentered(GUI_COLOR_TEXT_TITLE, lang.debug["shader_debug"].c_str());
+            ImGui::Checkbox(lang.debug["force_preserve_f16_u16_attachment"].c_str(), &config.debug_force_preserve_f16_u16_attachment);
+            SetTooltipEx(lang.debug["force_preserve_f16_u16_attachment_description"].c_str());
+            ImGui::Checkbox(lang.debug["force_mediump_highp"].c_str(), &config.debug_force_mediump_highp);
+            SetTooltipEx(lang.debug["force_mediump_highp_description"].c_str());
+            ImGui::Checkbox(lang.debug["disable_vertex_color"].c_str(), &config.debug_disable_vertex_color);
+            SetTooltipEx(lang.debug["disable_vertex_color_description"].c_str());
+            ImGui::Checkbox(lang.debug["force_texture_sampling"].c_str(), &config.debug_force_texture_sampling);
+            SetTooltipEx(lang.debug["force_texture_sampling_description"].c_str());
+
+            const int forced_paths = static_cast<int>(config.debug_force_shader_interlock)
+                + static_cast<int>(config.debug_force_direct_fragcolor)
+                + static_cast<int>(config.debug_force_texture_barrier);
+            if (forced_paths > 1) {
+                ImGui::TextColored(GUI_COLOR_TEXT, "%s", lang.debug["render_path_debug_conflict"].c_str());
+            }
         }
         ImGui::Spacing();
         if (ImGui::Button(emuenv.kernel.debugger.watch_code ? lang.debug["unwatch_code"].c_str() : lang.debug["watch_code"].c_str())) {
@@ -1579,7 +1656,14 @@ void draw_settings_dialog(GuiState &gui, EmuEnvState &emuenv) {
 #ifdef __ANDROID__
             || (config.custom_driver_name != emuenv.renderer->current_custom_driver)
 #endif
-            || (config.resolution_multiplier != emuenv.renderer->res_multiplier));
+            || (config.resolution_multiplier != emuenv.renderer->res_multiplier)
+            || (config.debug_force_shader_interlock != emuenv.cfg.current_config.debug_force_shader_interlock)
+            || (config.debug_force_direct_fragcolor != emuenv.cfg.current_config.debug_force_direct_fragcolor)
+            || (config.debug_force_texture_barrier != emuenv.cfg.current_config.debug_force_texture_barrier)
+            || (config.debug_force_preserve_f16_u16_attachment != emuenv.cfg.current_config.debug_force_preserve_f16_u16_attachment)
+            || (config.debug_force_mediump_highp != emuenv.cfg.current_config.debug_force_mediump_highp)
+            || (config.debug_disable_vertex_color != emuenv.cfg.current_config.debug_disable_vertex_color)
+            || (config.debug_force_texture_sampling != emuenv.cfg.current_config.debug_force_texture_sampling));
     if (ImGui::Button(is_apply ? (is_reboot ? lang.main_window["save_reboot"].c_str() : lang.main_window["save_apply"].c_str()) : lang.main_window["save_close"].c_str(), BUTTON_SIZE)) {
         save_config(gui, emuenv);
         if (is_apply)
