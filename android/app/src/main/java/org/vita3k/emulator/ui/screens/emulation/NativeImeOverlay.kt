@@ -33,7 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -113,7 +113,7 @@ private fun NativeImeOverlay(
     ) {
         state?.let { current ->
             val useCustomKeyboard = current.imeKeyboardMode == 0
-            var useUppercase by rememberSaveable(current.imeKeyboardMode) { mutableStateOf(false) }
+            var useUppercase by remember(current.imeKeyboardMode) { mutableStateOf(false) }
 
             BoxWithConstraints(
                 modifier = Modifier
@@ -328,7 +328,7 @@ private fun commitImeKey(text: String, useUppercase: Boolean) {
 }
 
 @Composable
-private fun imeLetterRow(labels: List<String>, useUppercase: Boolean) {
+private fun RowScope.imeLetterRow(labels: List<String>, useUppercase: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
