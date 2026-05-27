@@ -372,6 +372,7 @@ public class Emulator extends SDLActivity
             }
             applyKeyboardOverlayState(active);
             if (active) {
+                restoreVitaTextInput();
                 scheduleVitaTextEditSwap();
             }
             if (active) {
@@ -762,6 +763,7 @@ public class Emulator extends SDLActivity
                         : new RelativeLayout.LayoutParams(mTextEdit.getLayoutParams());
         final boolean visible = mTextEdit.getVisibility() == View.VISIBLE;
         final boolean focused = mTextEdit.hasFocus();
+        final boolean shouldActivate = visible || focused || nativeKeyboardRequested;
 
         mLayout.removeView(mTextEdit);
         final VitaTextEdit replacement = new VitaTextEdit(this);
@@ -769,12 +771,10 @@ public class Emulator extends SDLActivity
         mTextEdit = replacement;
         mLayout.addView(mTextEdit, params);
 
-        if (visible) {
+        if (shouldActivate) {
             mTextEdit.setVisibility(View.VISIBLE);
-            if (focused || nativeKeyboardRequested) {
-                mTextEdit.requestFocus();
-                showSoftKeyboard(mTextEdit);
-            }
+            mTextEdit.requestFocus();
+            showSoftKeyboard(mTextEdit);
         }
     }
 
