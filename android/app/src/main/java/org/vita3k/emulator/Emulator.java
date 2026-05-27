@@ -582,6 +582,16 @@ public class Emulator extends SDLActivity
                 mSurface.requestFocus();
             }
 
+            if (mTextEdit instanceof VitaTextEdit) {
+                ((VitaTextEdit) mTextEdit).clearConnectionState();
+            }
+            if (mTextEdit != null) {
+                mTextEdit.clearFocus();
+                mTextEdit.setVisibility(View.GONE);
+            }
+
+            applyKeyboardOverlayState(false);
+
             NativeImeState imeState = sessionViewModel != null ? sessionViewModel.getImeState() : null;
             boolean dialogActive = imeState != null && imeState.getDialogActive();
 
@@ -596,7 +606,6 @@ public class Emulator extends SDLActivity
 
             if (dismissedInNative && dialogActive) {
                 imeDismissedByUser = true;
-                applyKeyboardOverlayState(false);
                 return;
             }
 
