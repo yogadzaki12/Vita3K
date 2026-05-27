@@ -26,7 +26,8 @@ public class VitaTextEdit extends SDLDummyEdit {
 
         outAttrs.inputType = getInputTypeValue(this);
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI |
-                EditorInfo.IME_FLAG_NO_FULLSCREEN;
+            EditorInfo.IME_FLAG_NO_FULLSCREEN |
+            EditorInfo.IME_ACTION_DONE;
 
         return connection;
     }
