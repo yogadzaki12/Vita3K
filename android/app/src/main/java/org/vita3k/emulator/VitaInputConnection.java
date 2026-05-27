@@ -33,7 +33,25 @@ public class VitaInputConnection extends SDLInputConnection {
         mCommittedText = "";
     }
 
+    private void commitCurrentEditableText() {
+        android.text.Editable content = getEditable();
+        if (content == null) {
+            return;
+        }
+
+        String text = content.toString();
+        if (text.isEmpty()) {
+            return;
+        }
+
+        try {
+            NativeLib.INSTANCE.commitImeText(text);
+        } catch (Throwable ignored) {
+        }
+    }
+
     private void submitFromKeyboard() {
+        commitCurrentEditableText();
         Emulator emulator = getEmulator();
         if (emulator != null) {
             emulator.completeImeFromKeyboard(mEditText);

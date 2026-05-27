@@ -91,6 +91,7 @@ public class Emulator extends SDLActivity
     private SettingsViewModel pauseGlobalSettingsViewModel;
     private InputManager inputManager;
     private boolean nativeKeyboardRequested;
+    private boolean nativeImeOverlaySuppressed;
     private boolean imeDismissedByUser;
     private boolean imeVisible;
     private boolean imeWasVisibleSinceRequest;
@@ -422,10 +423,15 @@ public class Emulator extends SDLActivity
 
     public void clearNativeImeState() {
         runOnUiThread(() -> {
+            nativeImeOverlaySuppressed = false;
             if (sessionViewModel != null) {
                 sessionViewModel.updateImeState(null);
             }
         });
+    }
+
+    public boolean isNativeImeOverlaySuppressed() {
+        return nativeImeOverlaySuppressed;
     }
 
     @Keep
@@ -540,6 +546,7 @@ public class Emulator extends SDLActivity
             imeDismissedByUser = true;
             restoreImeAfterPauseMenu = false;
             suppressImeHiddenHandler = true;
+            nativeImeOverlaySuppressed = true;
             applyKeyboardOverlayState(false);
 
             View target = source != null ? source : (mSurface != null ? mSurface : getWindow().getDecorView());
@@ -608,6 +615,7 @@ public class Emulator extends SDLActivity
 
             restoreImeAfterPauseMenu = false;
             suppressImeHiddenHandler = true;
+            nativeImeOverlaySuppressed = false;
 
             if (dismissedInNative && dialogActive) {
                 imeDismissedByUser = true;

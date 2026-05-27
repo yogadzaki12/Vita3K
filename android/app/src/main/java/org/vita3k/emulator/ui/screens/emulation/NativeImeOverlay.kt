@@ -94,6 +94,7 @@ private fun NativeImeOverlay(
         && state.dialogActive.not()
         && !uiState.showMenu
         && !uiState.isEditingControls
+        && (context as? Emulator)?.isNativeImeOverlaySuppressed() != true
 
     SideEffect {
         hostView.visibility = if (visible) View.VISIBLE else View.GONE
