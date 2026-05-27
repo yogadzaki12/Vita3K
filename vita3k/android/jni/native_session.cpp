@@ -158,6 +158,50 @@ Java_org_vita3k_emulator_NativeLib_isImeActive(JNIEnv *, jclass) {
 }
 
 JNIEXPORT jboolean JNICALL
+Java_org_vita3k_emulator_NativeLib_commitImeText(JNIEnv *env, jclass, jstring text_str) {
+    auto *emuenv = get_emuenv();
+    auto *controller = get_app_session_controller();
+    if (!emuenv || !controller || !controller->is_running() || !text_str)
+        return JNI_FALSE;
+
+    const std::string text = jstring_to_string(env, text_str);
+    if (text.empty())
+        return JNI_FALSE;
+
+    return apply_ime_commit_text(*emuenv, string_utils::utf8_to_utf16(text)) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_vita3k_emulator_NativeLib_imeBackspace(JNIEnv *, jclass) {
+    auto *emuenv = get_emuenv();
+    auto *controller = get_app_session_controller();
+    if (!emuenv || !controller || !controller->is_running())
+        return JNI_FALSE;
+
+    return apply_ime_backspace(*emuenv) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_vita3k_emulator_NativeLib_imeMoveCaretLeft(JNIEnv *, jclass) {
+    auto *emuenv = get_emuenv();
+    auto *controller = get_app_session_controller();
+    if (!emuenv || !controller || !controller->is_running())
+        return JNI_FALSE;
+
+    return apply_ime_cursor_left(*emuenv) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_vita3k_emulator_NativeLib_imeMoveCaretRight(JNIEnv *, jclass) {
+    auto *emuenv = get_emuenv();
+    auto *controller = get_app_session_controller();
+    if (!emuenv || !controller || !controller->is_running())
+        return JNI_FALSE;
+
+    return apply_ime_cursor_right(*emuenv) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
 Java_org_vita3k_emulator_NativeLib_submitIme(JNIEnv *, jclass) {
     auto *emuenv = get_emuenv();
     auto *controller = get_app_session_controller();

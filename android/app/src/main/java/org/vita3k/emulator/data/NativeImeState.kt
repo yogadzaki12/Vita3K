@@ -7,6 +7,8 @@ data class NativeImeState(
     val preeditStart: Int,
     val preeditLength: Int,
     val caretIndex: Int,
+    val imeType: Int,
+    val imeKeyboardMode: Int,
     val multiline: Boolean,
     val enterLabel: String
 )

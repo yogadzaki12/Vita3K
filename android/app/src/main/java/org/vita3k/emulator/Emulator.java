@@ -356,8 +356,9 @@ public class Emulator extends SDLActivity
     private int mSavedOverlayMask = 0;
 
     @Keep
-    public void setKeyboardActive(boolean active) {
+    public void setKeyboardActive(boolean active, int imeKeyboardMode) {
         runOnUiThread(() -> {
+            boolean useSystemKeyboard = imeKeyboardMode != 0;
             nativeKeyboardRequested = active;
             if (active) {
                 imeDismissedByUser = false;
@@ -371,7 +372,7 @@ public class Emulator extends SDLActivity
                 imeWasVisibleSinceRequest = false;
             }
             applyKeyboardOverlayState(active);
-            if (active) {
+            if (active && useSystemKeyboard) {
                 restoreVitaTextInput();
                 scheduleVitaTextEditSwap();
             } else if (mTextEdit != null) {
@@ -396,6 +397,8 @@ public class Emulator extends SDLActivity
             int preeditStart,
             int preeditLength,
             int caretIndex,
+            int imeType,
+            int imeKeyboardMode,
             boolean multiline,
             String enterLabel) {
         runOnUiThread(() -> {
@@ -410,6 +413,8 @@ public class Emulator extends SDLActivity
                     preeditStart,
                     preeditLength,
                     caretIndex,
+                    imeType,
+                    imeKeyboardMode,
                     multiline,
                     enterLabel != null ? enterLabel : ""));
         });

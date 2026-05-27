@@ -11,21 +11,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -90,12 +99,21 @@ private fun NativeImeOverlay(
         hostView.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
+    LaunchedEffect(visible, imeState?.imeKeyboardMode) {
+        if (visible) {
+            (context as? Emulator)?.syncImeKeyboardMode(imeState?.imeKeyboardMode ?: 1)
+        }
+    }
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(tween(180)) + slideInVertically(initialOffsetY = { -it / 2 }),
         exit = fadeOut(tween(140)) + slideOutVertically(targetOffsetY = { -it / 3 })
     ) {
         state?.let { current ->
+            val useCustomKeyboard = current.imeKeyboardMode == 0
+            var useUppercase by rememberSaveable(current.imeKeyboardMode) { mutableStateOf(false) }
+
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -114,11 +132,12 @@ private fun NativeImeOverlay(
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp
                 ) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.Transparent)
-                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         val buttonInset = if (current.enterLabel.isNotBlank()) 96.dp else 0.dp
 
@@ -149,19 +168,138 @@ private fun NativeImeOverlay(
                             }
                         }
 
-                        if (current.enterLabel.isNotBlank()) {
+                        if (useCustomKeyboard) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                imeLetterRow(listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"), useUppercase)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Spacer(modifier = Modifier.weight(0.5f))
+                                    imeLetterKey("a", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("s", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("d", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("f", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("g", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("h", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("j", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("k", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("l", useUppercase, Modifier.weight(1f))
+                                    Spacer(modifier = Modifier.weight(0.5f))
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    TextButton(
+                                        onClick = { useUppercase = !useUppercase },
+                                        modifier = Modifier
+                                            .weight(1.4f)
+                                            .height(44.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(ImeOverlayBackground)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.emulation_ime_key_shift),
+                                            color = ImeOverlayText,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                    imeLetterKey("z", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("x", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("c", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("v", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("b", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("n", useUppercase, Modifier.weight(1f))
+                                    imeLetterKey("m", useUppercase, Modifier.weight(1f))
+                                    TextButton(
+                                        onClick = { runCatching { NativeLib.imeBackspace() } },
+                                        modifier = Modifier
+                                            .weight(1.8f)
+                                            .height(44.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(ImeOverlayBackground)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.emulation_ime_key_backspace),
+                                            color = ImeOverlayText,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    imeDigitKey("1", Modifier.weight(1f))
+                                    imeDigitKey("2", Modifier.weight(1f))
+                                    imeDigitKey("3", Modifier.weight(1f))
+                                    imeDigitKey("4", Modifier.weight(1f))
+                                    imeDigitKey("5", Modifier.weight(1f))
+                                    imeDigitKey("6", Modifier.weight(1f))
+                                    imeDigitKey("7", Modifier.weight(1f))
+                                    imeDigitKey("8", Modifier.weight(1f))
+                                    imeDigitKey("9", Modifier.weight(1f))
+                                    imeDigitKey("0", Modifier.weight(1f))
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    TextButton(
+                                        onClick = { runCatching { NativeLib.dismissIme() } },
+                                        modifier = Modifier
+                                            .weight(1.3f)
+                                            .height(44.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(ImeOverlayBackground)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.emulation_ime_key_close),
+                                            color = ImeOverlayText,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                    TextButton(
+                                        onClick = { commitImeKey(" ", false) },
+                                        modifier = Modifier
+                                            .weight(2.4f)
+                                            .height(44.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(ImeOverlayBackground)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.emulation_ime_key_space),
+                                            color = ImeOverlayText,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                    TextButton(
+                                        onClick = { runCatching { NativeLib.submitIme() } },
+                                        modifier = Modifier
+                                            .weight(1.3f)
+                                            .height(44.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(ImeOverlayBackground)
+                                    ) {
+                                        Text(
+                                            text = if (current.enterLabel.isNotBlank()) current.enterLabel else stringResource(R.string.emulation_ime_key_enter),
+                                            color = ImeOverlayText,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                }
+                            }
+                        } else if (current.enterLabel.isNotBlank()) {
                             Box(
-                                modifier = Modifier.align(Alignment.CenterEnd)
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterEnd
                             ) {
                                 TextButton(
-                                    onClick = {
-                                        val activity = context as? Emulator
-                                        if (activity != null) {
-                                            activity.completeImeFromKeyboard(null)
-                                        } else {
-                                            runCatching { NativeLib.submitIme() }
-                                        }
-                                    },
+                                    onClick = { runCatching { NativeLib.submitIme() } },
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(999.dp))
                                         .background(ImeOverlayBackground)
@@ -178,6 +316,70 @@ private fun NativeImeOverlay(
                 }
             }
         }
+    }
+}
+
+private fun commitImeKey(text: String, useUppercase: Boolean) {
+    val value = if (useUppercase) text.uppercase() else text
+    if (value.isNotEmpty()) {
+        runCatching { NativeLib.commitImeText(value) }
+    }
+}
+
+@Composable
+private fun imeLetterRow(labels: List<String>, useUppercase: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        labels.forEach { label ->
+            imeLetterKey(label, useUppercase, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun imeLetterKey(
+    label: String,
+    useUppercase: Boolean,
+    modifier: Modifier = Modifier
+) {
+    TextButton(
+        onClick = { commitImeKey(label, useUppercase) },
+        modifier = modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(ImeOverlayBackground)
+    ) {
+        Text(
+            text = if (useUppercase) label.uppercase() else label,
+            color = ImeOverlayText,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun imeDigitKey(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    TextButton(
+        onClick = { commitImeKey(label, false) },
+        modifier = modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(ImeOverlayBackground)
+    ) {
+        Text(
+            text = label,
+            color = ImeOverlayText,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

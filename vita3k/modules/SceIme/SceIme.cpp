@@ -50,7 +50,7 @@ EXPORT(SceInt32, sceImeClose) {
     emuenv.ime.param.inputTextBuffer = Ptr<SceWChar16>();
 
 #ifdef __ANDROID__
-    ime::set_keyboard_active(false);
+    ime::set_keyboard_active(false, emuenv.cfg.ime_keyboard_mode);
 #endif
 
     return 0;
@@ -93,7 +93,7 @@ EXPORT(SceInt32, sceImeOpen, SceImeParam *param) {
     emuenv.ime.state = true;
 
 #ifdef __ANDROID__
-    ime::set_keyboard_active(true);
+    ime::set_keyboard_active(true, emuenv.cfg.ime_keyboard_mode);
 #endif
 
     SceImeEvent e{};

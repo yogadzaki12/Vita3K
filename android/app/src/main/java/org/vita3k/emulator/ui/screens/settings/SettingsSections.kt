@@ -1190,6 +1190,25 @@ private fun SystemSettingsSection(
             help = enterButtonHelp,
             onShowHelp = onShowHelp
         )
+        if (!isPerApp) {
+            val imeKeyboardModeTitle = stringResource(R.string.emulation_ime_keyboard_mode)
+            val imeKeyboardModeHelp = helpEntry(
+                imeKeyboardModeTitle,
+                stringResource(R.string.emulation_ime_keyboard_mode_desc),
+                scope = SettingsScope.Global
+            )
+            SettingsChoiceField(
+                title = imeKeyboardModeTitle,
+                options = listOf(
+                    stringResource(R.string.emulation_ime_keyboard_custom),
+                    stringResource(R.string.emulation_ime_keyboard_android)
+                ),
+                selectedIndex = cfg.imeKeyboardMode.coerceIn(0, 1),
+                onSelect = { index -> onUpdate { imeKeyboardMode = index.coerceIn(0, 1) } },
+                help = imeKeyboardModeHelp,
+                onShowHelp = onShowHelp
+            )
+        }
     }
 
     SettingsSectionCard(title = stringResource(R.string.settings_system_region_language), summary = null, help = null, onShowHelp = onShowHelp) {

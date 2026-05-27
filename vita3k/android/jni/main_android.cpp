@@ -63,11 +63,7 @@ bool handle_ime_keydown(EmuEnvState &emuenv, const SDL_KeyboardEvent &event) {
 
     switch (event.key) {
     case SDLK_BACKSPACE: {
-        {
-            std::lock_guard<std::mutex> lock(ime.mutex);
-            ime_backspace(ime);
-        }
-        ime::notify_ime_state_changed();
+        apply_ime_backspace(emuenv);
         return true;
     }
 
@@ -93,20 +89,12 @@ bool handle_ime_keydown(EmuEnvState &emuenv, const SDL_KeyboardEvent &event) {
         return true;
 
     case SDLK_LEFT: {
-        {
-            std::lock_guard<std::mutex> lock(ime.mutex);
-            ime_cursor_left(ime);
-        }
-        ime::notify_ime_state_changed();
+        apply_ime_cursor_left(emuenv);
         return true;
     }
 
     case SDLK_RIGHT: {
-        {
-            std::lock_guard<std::mutex> lock(ime.mutex);
-            ime_cursor_right(ime);
-        }
-        ime::notify_ime_state_changed();
+        apply_ime_cursor_right(emuenv);
         return true;
     }
 
@@ -119,11 +107,7 @@ void handle_ime_text_editing(EmuEnvState &emuenv, const char *text) {
     if (!is_any_ime_active(emuenv))
         return;
 
-    {
-        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
-        ime_set_preedit(emuenv.ime, string_utils::utf8_to_utf16(text ? text : ""));
-    }
-    ime::notify_ime_state_changed();
+    apply_ime_set_preedit(emuenv, string_utils::utf8_to_utf16(text ? text : ""));
 }
 
 void handle_ime_text_input(EmuEnvState &emuenv, const char *text) {
@@ -140,11 +124,7 @@ void handle_ime_text_input(EmuEnvState &emuenv, const char *text) {
     if (filtered_text.empty())
         return;
 
-    {
-        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
-        ime_commit_text(emuenv.ime, string_utils::utf8_to_utf16(filtered_text));
-    }
-    ime::notify_ime_state_changed();
+    apply_ime_commit_text(emuenv, string_utils::utf8_to_utf16(filtered_text));
 }
 
 class AndroidFrameHost final : public renderer::FrameHost {

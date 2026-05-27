@@ -235,6 +235,15 @@
     <string name="settings_restart_game">Restart Game</string>
     <string name="settings_continue_playing">Continue Playing</string>
     <string name="emulation_ime_placeholder">Start typing…</string>
+    <string name="emulation_ime_keyboard_android">Android keyboard</string>
+    <string name="emulation_ime_keyboard_custom">Custom keyboard</string>
+    <string name="emulation_ime_keyboard_mode">IME keyboard mode</string>
+    <string name="emulation_ime_keyboard_mode_desc">Choose whether Vita3K uses the system Android keyboard or the built-in custom keyboard for IME input.</string>
+    <string name="emulation_ime_key_shift">Shift</string>
+    <string name="emulation_ime_key_backspace">Backspace</string>
+    <string name="emulation_ime_key_close">Close</string>
+    <string name="emulation_ime_key_space">Space</string>
+    <string name="emulation_ime_key_enter">Enter</string>
 
     <!-- Install bottom sheet -->
     <string name="install_sheet_title">Install Content</string>

@@ -95,6 +95,7 @@ struct Config {
         int sys_date_format = static_cast<int>(SCE_SYSTEM_PARAM_DATE_FORMAT_MMDDYYYY);
         int sys_time_format = static_cast<int>(SCE_SYSTEM_PARAM_TIME_FORMAT_12HOUR);
         std::vector<uint64_t> ime_langs = { 4 };
+        int ime_keyboard_mode = 0;
         bool log_active_shaders = false;
         bool log_uniforms = false;
         bool color_surface_debug = false;

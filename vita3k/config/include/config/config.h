@@ -186,6 +186,7 @@ using PhysicalKeyCode = input::PhysicalKeyCode;
     code(bool, "disable-motion", false, disable_motion)                                                 \
     code(float, "controller-analog-multiplier", 1.0f, controller_analog_multiplier)                     \
     CONFIG_KEYBOARD(code)                                                                               \
+    code(int, "ime-keyboard-mode", 0, ime_keyboard_mode)                                               \
     code(std::string, "user-id", std::string{}, user_id)                                                \
     code(bool, "user-auto-connect", false, auto_user_login)                                             \
     code(std::string, "user-lang", std::string{}, user_lang)                                            \

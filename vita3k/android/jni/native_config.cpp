@@ -22,6 +22,7 @@
 #include <config/config.h>
 #include <config/functions.h>
 #include <config/settings.h>
+#include <ime/keyboard.h>
 #include <io/state.h>
 #include <kernel/state.h>
 #include <lang/state.h>
@@ -83,6 +84,7 @@ struct EmulatorConfigFields {
     jfieldID sysDateFormat = nullptr;
     jfieldID sysTimeFormat = nullptr;
     jfieldID imeLangs = nullptr;
+    jfieldID imeKeyboardMode = nullptr;
     jfieldID userLang = nullptr;
     jfieldID psnSignedIn = nullptr;
     jfieldID httpEnable = nullptr;
@@ -168,6 +170,7 @@ EmulatorConfigFields resolve_config_fields(JNIEnv *env) {
     fields.sysDateFormat = env->GetFieldID(fields.cls, "sysDateFormat", "I");
     fields.sysTimeFormat = env->GetFieldID(fields.cls, "sysTimeFormat", "I");
     fields.imeLangs = env->GetFieldID(fields.cls, "imeLangs", "J");
+    fields.imeKeyboardMode = env->GetFieldID(fields.cls, "imeKeyboardMode", "I");
     fields.userLang = env->GetFieldID(fields.cls, "userLang", "Ljava/lang/String;");
     fields.psnSignedIn = env->GetFieldID(fields.cls, "psnSignedIn", "Z");
     fields.httpEnable = env->GetFieldID(fields.cls, "httpEnable", "Z");
@@ -371,6 +374,7 @@ void fill_config_object(JNIEnv *env, jobject obj, const EmulatorConfigFields &fi
     env->SetIntField(obj, fields.sysLang, static_cast<jint>(current_config.sys_lang));
     env->SetIntField(obj, fields.sysDateFormat, static_cast<jint>(current_config.sys_date_format));
     env->SetIntField(obj, fields.sysTimeFormat, static_cast<jint>(current_config.sys_time_format));
+    env->SetIntField(obj, fields.imeKeyboardMode, static_cast<jint>(current_config.ime_keyboard_mode));
     {
         uint64_t ime_mask = 0;
         for (const auto &language : current_config.ime_langs)
@@ -525,6 +529,7 @@ void read_config_object(JNIEnv *env, jobject obj, const EmulatorConfigFields &fi
     current_config.sys_lang = static_cast<int>(env->GetIntField(obj, fields.sysLang));
     current_config.sys_date_format = static_cast<int>(env->GetIntField(obj, fields.sysDateFormat));
     current_config.sys_time_format = static_cast<int>(env->GetIntField(obj, fields.sysTimeFormat));
+    current_config.ime_keyboard_mode = static_cast<int>(env->GetIntField(obj, fields.imeKeyboardMode));
     current_config.ime_langs = { static_cast<uint64_t>(env->GetLongField(obj, fields.imeLangs)) };
     {
         auto *value = reinterpret_cast<jstring>(env->GetObjectField(obj, fields.userLang));
@@ -688,6 +693,10 @@ Java_org_vita3k_emulator_NativeLib_saveSettings(JNIEnv *env, jclass, jstring tit
 
     const int previous_log_level = emuenv->cfg.log_level;
     const auto result = app::commit_settings(*emuenv, desired_cfg, title_id);
+
+    if (is_any_ime_active(*emuenv)) {
+        ime::notify_ime_state_changed();
+    }
 
     if (title_id.empty()) {
         if (emuenv->cfg.log_level != previous_log_level)

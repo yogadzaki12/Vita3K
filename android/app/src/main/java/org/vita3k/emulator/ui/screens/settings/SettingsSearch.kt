@@ -94,6 +94,9 @@ internal fun rememberSettingsSearchEntries(
             add(entry(SettingsCategory.System, R.string.settings_system_demo_mode, R.string.settings_system_demo_mode_desc, scope = SettingsScope.Global))
         }
         add(entry(SettingsCategory.System, R.string.settings_system_enter_button, R.string.settings_system_enter_button_desc))
+        if (!isPerApp) {
+            add(entry(SettingsCategory.System, R.string.emulation_ime_keyboard_mode, R.string.emulation_ime_keyboard_mode_desc, scope = SettingsScope.Global, keywords = "android keyboard custom ime input"))
+        }
         add(entry(SettingsCategory.System, R.string.settings_system_language, R.string.settings_system_language_desc))
         add(entry(SettingsCategory.System, R.string.settings_system_date_format, R.string.settings_system_date_format_desc))
         add(entry(SettingsCategory.System, R.string.settings_system_time_format, R.string.settings_system_time_format_desc))

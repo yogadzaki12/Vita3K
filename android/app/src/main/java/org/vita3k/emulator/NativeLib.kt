@@ -144,6 +144,14 @@ object NativeLib {
     external fun getRunningAppTitle(): String
     /** Returns true while either SceIme or CommonDialog IME is active. */
     external fun isImeActive(): Boolean
+    /** Commits text into the currently active native IME session. */
+    external fun commitImeText(text: String): Boolean
+    /** Applies a backspace action to the currently active native IME session. */
+    external fun imeBackspace(): Boolean
+    /** Moves the caret one position left in the currently active native IME session. */
+    external fun imeMoveCaretLeft(): Boolean
+    /** Moves the caret one position right in the currently active native IME session. */
+    external fun imeMoveCaretRight(): Boolean
     /** Submits the currently active IME session as if the user pressed Enter/OK. */
     external fun submitIme(): Boolean
     /** Dismisses the currently active IME session as if the user pressed Close/Back. */

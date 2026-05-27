@@ -27,7 +27,7 @@ namespace ime {
 void set_sdl_window(SDL_Window *window);
 
 // Show or hide the soft keyboard and toggle the on-screen controller overlay accordingly.
-void set_keyboard_active(bool active);
+void set_keyboard_active(bool active, int ime_keyboard_mode);
 
 // Push the current native IME snapshot to the Android activity/UI.
 void notify_ime_state_changed();

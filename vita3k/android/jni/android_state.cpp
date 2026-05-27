@@ -66,6 +66,75 @@ bool is_any_ime_active(const EmuEnvState &emuenv) {
     return emuenv.ime.state || is_ime_dialog_active(emuenv);
 }
 
+int get_ime_keyboard_mode(const EmuEnvState &emuenv) {
+    return emuenv.cfg.ime_keyboard_mode;
+}
+
+bool apply_ime_commit_text(EmuEnvState &emuenv, const std::u16string &text) {
+    if (!is_any_ime_active(emuenv) || text.empty())
+        return false;
+
+    {
+        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
+        ime_commit_text(emuenv.ime, text);
+    }
+
+    ime::notify_ime_state_changed();
+    return true;
+}
+
+bool apply_ime_set_preedit(EmuEnvState &emuenv, const std::u16string &preedit) {
+    if (!is_any_ime_active(emuenv))
+        return false;
+
+    {
+        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
+        ime_set_preedit(emuenv.ime, preedit);
+    }
+
+    ime::notify_ime_state_changed();
+    return true;
+}
+
+bool apply_ime_backspace(EmuEnvState &emuenv) {
+    if (!is_any_ime_active(emuenv))
+        return false;
+
+    {
+        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
+        ime_backspace(emuenv.ime);
+    }
+
+    ime::notify_ime_state_changed();
+    return true;
+}
+
+bool apply_ime_cursor_left(EmuEnvState &emuenv) {
+    if (!is_any_ime_active(emuenv))
+        return false;
+
+    {
+        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
+        ime_cursor_left(emuenv.ime);
+    }
+
+    ime::notify_ime_state_changed();
+    return true;
+}
+
+bool apply_ime_cursor_right(EmuEnvState &emuenv) {
+    if (!is_any_ime_active(emuenv))
+        return false;
+
+    {
+        std::lock_guard<std::mutex> lock(emuenv.ime.mutex);
+        ime_cursor_right(emuenv.ime);
+    }
+
+    ime::notify_ime_state_changed();
+    return true;
+}
+
 void finish_ime_dialog(EmuEnvState &emuenv) {
     auto &dialog = emuenv.common_dialog;
     auto &ime = emuenv.ime;

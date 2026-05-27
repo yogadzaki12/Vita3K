@@ -51,6 +51,8 @@ void push_ime_state(JNIEnv *env, jobject activity, jclass clazz, EmuEnvState &em
     uint32_t preedit_start = 0;
     uint32_t preedit_length = 0;
     uint32_t caret_index = 0;
+    uint32_t ime_type = 0;
+    uint32_t ime_keyboard_mode = 0;
     bool multiline = false;
     std::string enter_label;
     {
@@ -60,6 +62,8 @@ void push_ime_state(JNIEnv *env, jobject activity, jclass clazz, EmuEnvState &em
         preedit_start = emuenv.ime.edit_text.preeditIndex;
         preedit_length = emuenv.ime.edit_text.preeditLength;
         caret_index = emuenv.ime.edit_text.caretIndex;
+        ime_type = emuenv.ime.param.type;
+        ime_keyboard_mode = static_cast<uint32_t>(emuenv.cfg.ime_keyboard_mode);
         multiline = dialog_active
             ? emuenv.common_dialog.ime.multiline
             : ((emuenv.ime.param.option & SCE_IME_OPTION_MULTILINE) != 0);
@@ -69,7 +73,7 @@ void push_ime_state(JNIEnv *env, jobject activity, jclass clazz, EmuEnvState &em
     const jmethodID method_id = env->GetMethodID(
         clazz,
         "updateNativeImeState",
-        "(ZZLjava/lang/String;IIIZLjava/lang/String;)V");
+        "(ZZLjava/lang/String;IIIIIZLjava/lang/String;)V");
     if (!method_id)
         return;
 
@@ -84,6 +88,8 @@ void push_ime_state(JNIEnv *env, jobject activity, jclass clazz, EmuEnvState &em
         static_cast<jint>(preedit_start),
         static_cast<jint>(preedit_length),
         static_cast<jint>(caret_index),
+        static_cast<jint>(ime_type),
+        static_cast<jint>(ime_keyboard_mode),
         static_cast<jboolean>(multiline),
         enter_label_value);
     env->DeleteLocalRef(text_value);
@@ -96,20 +102,22 @@ void set_sdl_window(SDL_Window *window) {
     s_window = window;
 }
 
-void set_keyboard_active(bool active) {
+void set_keyboard_active(bool active, int ime_keyboard_mode) {
+    const bool use_system_keyboard = ime_keyboard_mode != 0;
+
     if (s_window) {
-        if (active)
+        if (active && use_system_keyboard)
             SDL_StartTextInput(s_window);
-        else
+        else if (!active || use_system_keyboard)
             SDL_StopTextInput(s_window);
     }
 
     JNIEnv *env = reinterpret_cast<JNIEnv *>(SDL_GetAndroidJNIEnv());
     jobject activity = reinterpret_cast<jobject>(SDL_GetAndroidActivity());
     jclass clazz = env->GetObjectClass(activity);
-    jmethodID method_id = env->GetMethodID(clazz, "setKeyboardActive", "(Z)V");
+    jmethodID method_id = env->GetMethodID(clazz, "setKeyboardActive", "(ZI)V");
     if (method_id)
-        env->CallVoidMethod(activity, method_id, static_cast<jboolean>(active));
+        env->CallVoidMethod(activity, method_id, static_cast<jboolean>(active), static_cast<jint>(ime_keyboard_mode));
 
     auto *emuenv = get_emuenv();
     if (emuenv)

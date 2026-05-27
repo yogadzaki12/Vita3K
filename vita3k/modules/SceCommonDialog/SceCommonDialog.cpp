@@ -183,7 +183,7 @@ EXPORT(int, sceImeDialogAbort) {
     emuenv.common_dialog.status = SCE_COMMON_DIALOG_STATUS_FINISHED;
     emuenv.common_dialog.result = SCE_COMMON_DIALOG_RESULT_ABORTED;
 #ifdef __ANDROID__
-    ime::set_keyboard_active(false);
+    ime::set_keyboard_active(false, emuenv.cfg.ime_keyboard_mode);
 #endif
     return 0;
 }
@@ -244,7 +244,7 @@ EXPORT(int, sceImeDialogInit, const Ptr<SceImeDialogParam> param) {
     emuenv.common_dialog.active_ime = &emuenv.ime;
 
 #ifdef __ANDROID__
-    ime::set_keyboard_active(true);
+    ime::set_keyboard_active(true, emuenv.cfg.ime_keyboard_mode);
 #endif
 
     return 0;
@@ -273,7 +273,7 @@ EXPORT(int, sceImeDialogTerm) {
     }
 
 #ifdef __ANDROID__
-    ime::set_keyboard_active(false);
+    ime::set_keyboard_active(false, emuenv.cfg.ime_keyboard_mode);
 #endif
 
     return 0;

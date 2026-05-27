@@ -60,6 +60,7 @@ class EmulatorConfig {
     @JvmField var sysDateFormat: Int = 2
     @JvmField var sysTimeFormat: Int = 0
     @JvmField var imeLangs: Long = 4L
+    @JvmField var imeKeyboardMode: Int = 0
     @JvmField var userLang: String = ""
 
     // Network
@@ -141,6 +142,7 @@ class EmulatorConfig {
         config.sysDateFormat = sysDateFormat
         config.sysTimeFormat = sysTimeFormat
         config.imeLangs = imeLangs
+        config.imeKeyboardMode = imeKeyboardMode
         config.userLang = userLang
         config.psnSignedIn = psnSignedIn
         config.httpEnable = httpEnable
@@ -220,6 +222,7 @@ class EmulatorConfig {
             sysDateFormat == other.sysDateFormat &&
             sysTimeFormat == other.sysTimeFormat &&
             imeLangs == other.imeLangs &&
+            imeKeyboardMode == other.imeKeyboardMode &&
             userLang == other.userLang &&
             psnSignedIn == other.psnSignedIn &&
             httpEnable == other.httpEnable &&
@@ -296,6 +299,7 @@ class EmulatorConfig {
         result = 31 * result + sysDateFormat
         result = 31 * result + sysTimeFormat
         result = 31 * result + imeLangs.hashCode()
+        result = 31 * result + imeKeyboardMode
         result = 31 * result + userLang.hashCode()
         result = 31 * result + psnSignedIn.hashCode()
         result = 31 * result + httpEnable.hashCode()
