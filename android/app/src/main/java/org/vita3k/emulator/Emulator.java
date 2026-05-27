@@ -430,6 +430,38 @@ public class Emulator extends SDLActivity
         });
     }
 
+    public void syncImeKeyboardMode(int imeKeyboardMode) {
+        runOnUiThread(() -> {
+            if (!nativeKeyboardRequested) {
+                return;
+            }
+
+            boolean useSystemKeyboard = imeKeyboardMode != 0;
+            if (useSystemKeyboard) {
+                restoreVitaTextInput();
+                scheduleVitaTextEditSwap();
+                ensureOverlayUiOrder();
+                return;
+            }
+
+            if (mTextEdit != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(mTextEdit.getWindowToken(), 0);
+                }
+                if (mTextEdit instanceof VitaTextEdit) {
+                    ((VitaTextEdit) mTextEdit).clearConnectionState();
+                }
+                mTextEdit.clearFocus();
+                mTextEdit.setVisibility(View.GONE);
+            }
+            if (mSurface != null) {
+                mSurface.requestFocus();
+            }
+            ensureOverlayUiOrder();
+        });
+    }
+
     public boolean isNativeImeOverlaySuppressed() {
         return nativeImeOverlaySuppressed;
     }
