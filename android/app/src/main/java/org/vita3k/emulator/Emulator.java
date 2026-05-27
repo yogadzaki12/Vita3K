@@ -374,6 +374,15 @@ public class Emulator extends SDLActivity
             if (active) {
                 restoreVitaTextInput();
                 scheduleVitaTextEditSwap();
+            } else if (mTextEdit != null) {
+                if (mTextEdit instanceof VitaTextEdit) {
+                    ((VitaTextEdit) mTextEdit).clearConnectionState();
+                }
+                mTextEdit.clearFocus();
+                mTextEdit.setVisibility(View.GONE);
+                if (mSurface != null) {
+                    mSurface.requestFocus();
+                }
             }
             if (active) {
                 ensureOverlayUiOrder();
