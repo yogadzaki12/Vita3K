@@ -15,6 +15,8 @@ public class VitaTextEdit extends SDLDummyEdit {
 
     public VitaTextEdit(Context context) {
         super(context);
+        setFocusable(true);
+        setFocusableInTouchMode(true);
     }
 
     @Override
