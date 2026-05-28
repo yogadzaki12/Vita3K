@@ -12,6 +12,7 @@
 #include <ime/keyboard.h>
 #include <io/state.h>
 #include <motion/functions.h>
+#include <util/string_utils.h>
 
 #include <SDL3/SDL_events.h>
 #include <jni.h>
