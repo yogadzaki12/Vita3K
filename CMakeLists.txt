@@ -75,6 +75,12 @@ enable_testing()
 cmake_policy(SET CMP0069 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
 
+# CMake >= 3.30 removes FindBoost behind CMP0167.
+# Keep legacy behavior for current Boost discovery flow until migration.
+if(POLICY CMP0167)
+	cmake_policy(SET CMP0167 OLD)
+endif()
+
 set(lto_usage_mode ALWAYS RELEASE_ONLY NEVER)
 set(USE_LTO RELEASE_ONLY CACHE STRING "Use interprocedural optimization/link time optimization")
 set_property(CACHE USE_LTO PROPERTY STRINGS ${lto_usage_mode})
