@@ -285,6 +285,18 @@ jobs:
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: bash ./.ci/build-android.sh "${{ env.ARTIFACT_DIR }}"
 
+      - name: Upload Android native logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-native-logs-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            android/app/.cxx/**/CMakeFiles/CMakeOutput.log
+            android/app/.cxx/**/CMakeFiles/CMakeError.log
+            /usr/local/share/vcpkg/buildtrees/**/config-*.log
+            /usr/local/share/vcpkg/buildtrees/**/build-*.log
+
       - name: Print Android ccache statistics
         run: ccache -s
 

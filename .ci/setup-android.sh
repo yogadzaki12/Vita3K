@@ -6,7 +6,33 @@ android_build_tools="${ANDROID_BUILD_TOOLS:-36.0.0}"
 android_ndk_version="${ANDROID_NDK_VERSION:-29.0.14206865}"
 
 sudo apt-get update
-sudo apt-get install -y ninja-build
+sudo apt-get install -y \
+    ninja-build \
+    pkg-config \
+    libusb-1.0-0-dev \
+    zip \
+    unzip
+
+run_with_retry() {
+    local max_attempts="$1"
+    shift
+
+    local attempt=1
+    while true; do
+        if "$@"; then
+            return 0
+        fi
+
+        if [[ "$attempt" -ge "$max_attempts" ]]; then
+            return 1
+        fi
+
+        local backoff=$((attempt * 15))
+        echo "Command failed (attempt ${attempt}/${max_attempts}), retrying in ${backoff}s: $*" >&2
+        sleep "$backoff"
+        attempt=$((attempt + 1))
+    done
+}
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -29,7 +55,13 @@ if command -v sdkmanager > /dev/null; then
 fi
 
 pushd "$repo_root" > /dev/null
+export VCPKG_MAX_CONCURRENCY="${VCPKG_MAX_CONCURRENCY:-2}"
 for triplet in arm64-android x64-android; do
-    vcpkg install --triplet "$triplet"
+    echo "Installing vcpkg dependencies for ${triplet} (VCPKG_MAX_CONCURRENCY=${VCPKG_MAX_CONCURRENCY})"
+    if ! run_with_retry 3 vcpkg install --triplet "$triplet"; then
+        echo "vcpkg install failed for ${triplet}. Dumping recent vcpkg build logs..." >&2
+        find "${VCPKG_ROOT:-/usr/local/share/vcpkg}/buildtrees" -type f \( -name "*.log" -o -name "*.txt" \) -print | tail -n 60 >&2 || true
+        exit 1
+    fi
 done
 popd > /dev/null
